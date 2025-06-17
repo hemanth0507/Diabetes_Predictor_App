@@ -1,7 +1,6 @@
 import streamlit as st
 import numpy as np
 import joblib
-from streamlit_extras.metric_cards import style_metric_cards
 
 # ------------------ Load Model ------------------
 @st.cache_resource
