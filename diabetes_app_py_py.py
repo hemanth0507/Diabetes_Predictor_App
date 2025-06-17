@@ -11,7 +11,7 @@ import streamlit as st
 import numpy as np
 import joblib
 
-!pip install streamlit
+
 
 def load_model():
     return joblib.load("diabetes_model.pkl")
