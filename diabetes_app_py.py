@@ -1,38 +1,88 @@
 import streamlit as st
 import numpy as np
 import joblib
+from streamlit_extras.metric_cards import style_metric_cards
 
-# Load trained model from .pkl
+# ------------------ Load Model ------------------
 @st.cache_resource
 def load_model():
     return joblib.load("diabetes_model.pkl")
 
 model = load_model()
 
-# UI Setup
-st.set_page_config(page_title="Diabetes Prediction", layout="centered")
-st.title("🧪 Diabetes Prediction App")
-st.markdown("This app predicts whether a person has diabetes based on medical input values using a trained Logistic Regression model.")
+# ------------------ Page Config ------------------
+st.set_page_config(
+    page_title="Diabetes Prediction",
+    layout="centered",
+    page_icon="🩺"
+)
 
-# Sidebar Input
-st.sidebar.header("🔧 Input Patient Data")
-age = st.sidebar.slider("Age", 10, 100, 30)
-mass = st.sidebar.slider("BMI (Body Mass Index)", 10.0, 70.0, 30.0)
-insu = st.sidebar.slider("Insulin Level", 0, 300, 100)
-plas = st.sidebar.slider("Plasma Glucose", 0, 200, 100)
-pres = st.sidebar.slider("Blood Pressure", 0, 150, 70)
+# ------------------ Title & Intro ------------------
+st.markdown("""
+    <h1 style='text-align: center; color: #2c3e50;'>🧬 Diabetes Prediction App</h1>
+    <p style='text-align: center; font-size: 18px;'>Predict whether a person has diabetes based on medical test data using a trained Logistic Regression model.</p>
+    <hr>
+""", unsafe_allow_html=True)
 
-# Predict Button
-if st.sidebar.button("🚀 Predict"):
+# ------------------ Input Fields ------------------
+st.subheader("📝 Enter Patient Information")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    age = st.number_input("👴 Age", min_value=10, max_value=100, value=30)
+
+with col2:
+    mass = st.number_input("⚖️ BMI (Mass)", min_value=10.0, max_value=70.0, value=30.0)
+
+with col3:
+    insu = st.number_input("💉 Insulin Level", min_value=0, max_value=300, value=100)
+
+col4, col5 = st.columns(2)
+
+with col4:
+    plas = st.slider("🩸 Plasma Glucose", 0, 200, 100)
+
+with col5:
+    pres = st.slider("🫀 Blood Pressure", 0, 150, 70)
+
+# ------------------ Predict Button ------------------
+predict_btn = st.button("🚀 Predict Now", use_container_width=True)
+
+# ------------------ Result ------------------
+if predict_btn:
     input_data = np.array([[age, mass, insu, plas, pres]])
-    prediction = model.predict(input_data)[0]
+    
+    with st.spinner("🔍 Analyzing medical data..."):
+        prediction = model.predict(input_data)[0]
 
-    st.subheader("🔍 Prediction Result")
+    st.markdown("---")
+    st.subheader("📊 Prediction Outcome")
+
     if prediction == "tested_positive":
-        st.error("⚠️ The model predicts: **Diabetes Positive**.")
+        st.error("🩺 **Result: Diabetes Positive**", icon="⚠️")
+        st.markdown("""
+        <div style='background-color:#ffcccc;padding:20px;border-radius:10px'>
+            <b>Advice:</b> Please consult a healthcare provider for further evaluation and confirmatory tests.
+        </div>
+        """, unsafe_allow_html=True)
     else:
-        st.success("✅ The model predicts: **No Diabetes**.")
+        st.success("🧘 **Result: No Diabetes Detected**", icon="✅")
+        st.markdown("""
+        <div style='background-color:#d4edda;padding:20px;border-radius:10px'>
+            <b>Great News!</b> The patient is likely non-diabetic. Maintain a healthy lifestyle.
+        </div>
+        """, unsafe_allow_html=True)
 
-# Footer
-st.markdown("---")
-st.caption("👨‍⚕️ Developed using Streamlit | Logistic Regression based | Diabetes Prediction Tool")
+# ------------------ Optional Tabs ------------------
+with st.expander("📈 Show Model Information"):
+    st.markdown("""
+    - **Model Used**: Logistic Regression  
+    - **Features Used**: Age, BMI, Insulin, Plasma Glucose, Blood Pressure  
+    - **Trained On**: 768 Samples  
+    - **Accuracy**: ~77%
+    """)
+
+# ------------------ Footer ------------------
+st.markdown("""---""")
+st.markdown("<p style='text-align:center;'>Made with ❤️ by Hemanth | Powered by Streamlit</p>", unsafe_allow_html=True)
